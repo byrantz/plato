@@ -19,7 +19,7 @@ func GetEndpointsForDiscovery() []string {
 	return viper.GetStringSlice("discovery.endpoints")
 }
 
-// 获取连接服务发现集群的超时时间 单位微秒
+// 获取连接服务发现集群的超时时间 单位伟秒
 func GetTimeoutForDiscovery() time.Duration {
 	return viper.GetDuration("discovery.timeout") * time.Second
 }
@@ -28,7 +28,7 @@ func GetServicePathForIPConf() string {
 	return viper.GetString("ip_conf.service_path")
 }
 
-// 判断是不是 debug 环境
+// 判断是不是debug环境
 func IsDebug() bool {
 	env := viper.GetString("global.env")
 	return env == "debug"
