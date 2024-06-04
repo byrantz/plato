@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/cloudwego/hertz v0.2.1
+	github.com/goccy/go-json v0.9.4
 	github.com/gookit/color v1.5.1
 	github.com/panjf2000/ants v1.3.0
 	github.com/rocket049/gocui v0.3.2
@@ -34,7 +35,6 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	google.golang.org/genproto v0.0.0-20220915135415-7fd63a7952de // indirect
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.4.0 // indirect
 )
 
 require (
