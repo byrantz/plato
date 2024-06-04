@@ -8,6 +8,7 @@ require (
 	github.com/panjf2000/ants v1.3.0
 	github.com/rocket049/gocui v0.3.2
 	github.com/spf13/cobra v1.5.0
+	google.golang.org/protobuf v1.34.1
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -33,7 +34,7 @@ require (
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	google.golang.org/genproto v0.0.0-20220915135415-7fd63a7952de // indirect
-	google.golang.org/protobuf v1.34.1 // indirect
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.4.0 // indirect
 )
 
 require (
