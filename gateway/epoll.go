@@ -109,7 +109,6 @@ func (e *ePool) startEProc() {
 			return
 		default:
 			connections, err := ep.wait(200) // 200ms 一次轮询避免 忙轮询
-
 			if err != nil && err != syscall.EINTR {
 				fmt.Printf("failed to epoll wait %v\n", err)
 				continue
@@ -153,7 +152,7 @@ func (e *epoller) add(conn *connection) error {
 		return err
 	}
 	e.fdToConnTable.Store(conn.fd, conn)
-	ep.tables.Store(fd, conn)
+	ep.tables.Store(conn.id, conn)
 	conn.BindEpoller(e)
 	return nil
 }

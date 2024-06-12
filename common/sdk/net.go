@@ -51,10 +51,11 @@ func handAckMsg(c *connect, data []byte) *Message {
 		Content:    ackMsg.Msg,
 	}
 }
-
 func handPushMsg(c *connect, data []byte) *Message {
 	pushMsg := &message.PushMsg{}
 	proto.Unmarshal(data, pushMsg)
+	// if pushMsg.MsgID == c.maxMsgID+1 {
+	// 	c.maxMsgID++
 	msg := &Message{}
 	json.Unmarshal(pushMsg.Content, msg)
 	ackMsg := &message.ACKMsg{
@@ -64,6 +65,7 @@ func handPushMsg(c *connect, data []byte) *Message {
 	ackData, _ := proto.Marshal(ackMsg)
 	c.send(message.CmdType_ACK, ackData)
 	return msg
+	// }
 }
 
 func (c *connect) reConn() {
@@ -75,8 +77,7 @@ func (c *connect) reConn() {
 	}
 	c.conn = conn
 }
-
-func (c *connect) send(ty message.CmdType, palyload []byte) {
+func (c *connect) send(ty message.CmdType, palyload []byte) error {
 	// 直接发送给接收方
 	msgCmd := message.MsgCmd{
 		Type:    ty,
@@ -90,7 +91,8 @@ func (c *connect) send(ty message.CmdType, palyload []byte) {
 		Data: msg,
 		Len:  uint32(len(msg)),
 	}
-	c.conn.Write(dataPgk.Marshal())
+	_, err = c.conn.Write(dataPgk.Marshal())
+	return err
 }
 
 func (c *connect) recv() <-chan *Message {

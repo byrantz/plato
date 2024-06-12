@@ -12,7 +12,6 @@ func InitTimer() {
 	wheel = timingwheel.NewTimingWheel(time.Millisecond, 20)
 	wheel.Start()
 }
-
 func CloseTimer() {
 	wheel.Stop()
 }
