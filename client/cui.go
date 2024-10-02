@@ -84,6 +84,7 @@ func quit(g *gocui.Gui, v *gocui.View) error {
 }
 
 func doSay(g *gocui.Gui, cv *gocui.View) {
+	// v 是输出框对象
 	v, err := g.View("out")
 	if cv != nil && err == nil {
 		p := cv.ReadEditor()
@@ -228,6 +229,7 @@ func pasteDown(g *gocui.Gui, cv *gocui.View) error {
 
 func RunMain() {
 	// step1 创建chat的核心对象
+	// ip net.IP, port int, nick, userID, sessionID string
 	chat = sdk.NewChat(net.ParseIP("0.0.0.0"), 8900, "logic", "12312321", "2131")
 	// step2 创建 GUI 图层对象并进行参与与回调函数的配置
 	g, err := gocui.NewGui(gocui.OutputNormal)
@@ -241,7 +243,7 @@ func RunMain() {
 	// 设置编排函数
 	g.SetManagerFunc(layout)
 
-	// 注册回调事件
+	// 注册回调事件 回调函数为 quit、viewUpdate 等
 	if err := g.SetKeybinding("main", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
 		log.Panicln(err)
 	}
@@ -268,6 +270,7 @@ func RunMain() {
 	}()
 	// 启动消费函数
 	go doRecv(g)
+	// g 是 gui，g.MainLoop 是一个 for 循环
 	if err := g.MainLoop(); err != nil {
 		log.Println(err)
 	}

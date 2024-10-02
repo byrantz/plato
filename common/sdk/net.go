@@ -51,6 +51,7 @@ func handAckMsg(c *connect, data []byte) *Message {
 		Content:    ackMsg.Msg,
 	}
 }
+
 func handPushMsg(c *connect, data []byte) *Message {
 	pushMsg := &message.PushMsg{}
 	proto.Unmarshal(data, pushMsg)

@@ -46,6 +46,7 @@ func NewServiceRegister(ctx *context.Context,
 }
 
 // 设置租约
+
 func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 	// 设置租约时间
 	resp, err := s.cli.Grant(*s.ctx, lease)

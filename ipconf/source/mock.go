@@ -16,6 +16,7 @@ import (
 //		testServiceRegister(&ctx, "7897", "node2")
 //		testServiceRegister(&ctx, "7898", "node3")
 //	}
+
 func testServiceRegister(ctx *context.Context, port, node string) {
 	// 模拟服务发现
 	go func() {
@@ -31,7 +32,9 @@ func testServiceRegister(ctx *context.Context, port, node string) {
 		if err != nil {
 			panic(err)
 		}
+		// 租约用于确保服务的可用性和健康状态
 		go sr.ListenLeaseRespChan()
+		// 在一个无限循环中，不断更新 ed 的值，并调用 sr.UpdateValue(&ed) 来更新服务信息，每次更新间隔 1 秒
 		for {
 			ed = discovery.EndpointInfo{
 				IP:   "127.0.0.1",

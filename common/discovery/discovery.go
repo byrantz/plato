@@ -35,7 +35,7 @@ func NewServiceDiscovery(ctx *context.Context) *ServiceDiscovery {
 
 // WatchServive 初始化服务列表和监视
 func (s *ServiceDiscovery) WatchService(prefix string, set, del func(key, value string)) error {
-	// 根据前缀获取现有的 key
+	// 使用 etcd 客户端 cli 根据前缀获取现有的 key
 	resp, err := s.cli.Get(*s.ctx, prefix, clientv3.WithPrefix())
 	if err != nil {
 		return err

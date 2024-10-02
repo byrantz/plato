@@ -10,6 +10,7 @@ import (
 
 func Init() {
 	eventChan = make(chan *Event)
+	// 创建一个空的上下文，传递给 DataHandler
 	ctx := context.Background()
 	go DataHandler(&ctx)
 	if config.IsDebug() {
@@ -22,10 +23,13 @@ func Init() {
 }
 
 // 服务发现处理
+// DataHandler 函数通过服务发现机制监听服务的变化，并根据变化触发相应的事件。
+// 它定义了两个回调函数 setFunc 和 delFunc 来处理新增和删除节点的情况，并将事件发送到事件通道。
 func DataHandler(ctx *context.Context) {
-	// dis 服务发现监听器
+	// dis 创建服务发现监听器
 	dis := discovery.NewServiceDiscovery(ctx)
 	defer dis.Close()
+	// 定义处理新增节点的函数
 	setFunc := func(key, value string) {
 		if ed, err := discovery.UnMarshal([]byte(value)); err == nil {
 			if event := NewEvent(ed); ed != nil {
@@ -36,6 +40,7 @@ func DataHandler(ctx *context.Context) {
 			logger.CtxErrorf(*ctx, "DataHandler.setFunc.err :%s", err.Error())
 		}
 	}
+	// 定义处理删除节点的函数
 	delFunc := func(key, value string) {
 		if ed, err := discovery.UnMarshal([]byte(value)); err == nil {
 			if event := NewEvent(ed); ed != nil {
@@ -46,6 +51,7 @@ func DataHandler(ctx *context.Context) {
 			logger.CtxErrorf(*ctx, "DataHandler.delFunc.err :%s", err.Error())
 		}
 	}
+	// 开始监听服务变化
 	err := dis.WatchService(config.GetServicePathForIPConf(), setFunc, delFunc)
 	if err != nil {
 		panic(err)

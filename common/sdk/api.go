@@ -53,6 +53,7 @@ func NewChat(ip net.IP, port int, nick, userID, sessionID string) *Chat {
 	go chat.heartbeat()
 	return chat
 }
+
 func (chat *Chat) Send(msg *Message) {
 	data, _ := json.Marshal(msg)
 	key := fmt.Sprintf("%d", chat.conn.connID)

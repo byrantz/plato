@@ -22,7 +22,8 @@ type ePool struct {
 	eChan  chan *connection
 	tables sync.Map
 	eSize  int
-	done   chan struct{}
+	// done 一旦检测到关闭信号则关闭所有的epoller
+	done chan struct{}
 
 	ln *net.TCPListener
 	f  func(c *connection, ep *epoller)
@@ -220,5 +221,6 @@ func checkTcp() bool {
 }
 
 func setTcpConifg(c *net.TCPConn) {
+	// 开启 TCP 的 keep-alive 选项，这是一个传输层的特性。
 	_ = c.SetKeepAlive(true)
 }
