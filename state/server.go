@@ -19,14 +19,16 @@ import (
 // RunMain 启动网关服务
 func RunMain(path string) {
 	config.Init(path)
+	// 初始化cmdChannel
 	cmdChannel = make(chan *service.CmdContext, config.GetSateCmdChannelNum())
 	connToStateTable = sync.Map{}
 	s := prpc.NewPServer(
 		prpc.WithServiceName(config.GetStateServiceName()),
 		prpc.WithIP(config.GetSateServiceAddr()),
 		prpc.WithPort(config.GetSateServerPort()), prpc.WithWeight(config.GetSateRPCWeight()))
-
+	// 当有gateway 的 rpc 请求时，会像 cmdChannel 中写入数据
 	s.RegisterService(func(server *grpc.Server) {
+		// ？cmdChannel
 		service.RegisterStateServer(server, &service.Service{CmdChannel: cmdChannel})
 	})
 	// 初始化RPC 客户端
@@ -167,8 +169,8 @@ func hearbeatMsgHandler(cmdCtx *service.CmdContext, msgCmd *message.MsgCmd) {
 		return
 	}
 	if data, ok := connToStateTable.Load(cmdCtx.ConnID); ok {
-		sate, _ := data.(*connState)
-		sate.reSetHeartTimer()
+		state, _ := data.(*connState)
+		state.reSetHeartTimer()
 	}
 	// 未减少通信量，可以暂时不回复心跳的ack
 }

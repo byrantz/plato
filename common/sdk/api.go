@@ -54,7 +54,6 @@ func NewChat(ip net.IP, port int, nick, userID, sessionID string) *Chat {
 }
 func (chat *Chat) Send(msg *Message) {
 	// chat.conn.send(msg)
-	chat.conn.recvChan <- msg
 	data, _ := json.Marshal(msg)
 	upMsg := &message.UPMsg{
 		Head: &message.UPMsgHead{
@@ -87,6 +86,7 @@ func (chat *Chat) Recv() <-chan *Message {
 	return chat.conn.recv()
 }
 
+// loop 主要处理从连接中读取的消息，并根据消息类型分别处理 ACK 和 下行消息。处理后的消息会被发送到 recvChan 中
 func (chat *Chat) loop() {
 Loop:
 	for {
@@ -95,6 +95,7 @@ Loop:
 			return
 		default:
 			mc := &message.MsgCmd{}
+			// 没有数据的话，会一直阻塞在这里
 			data, err := tcp.ReadData(chat.conn.conn)
 			if err != nil {
 				goto Loop
@@ -110,6 +111,7 @@ Loop:
 			case message.CmdType_Push:
 				msg = handPushMsg(chat.conn, mc.Payload)
 			}
+			/*无论是 ACK 还是下行消息，都会交给 conn.recvChan ， Chat 的消费函数会监视这个 channel，如果是下行消息则显示，是 ACK 不做处理*/
 			chat.conn.recvChan <- msg
 		}
 	}
@@ -154,6 +156,7 @@ func (chat *Chat) reConn() {
 }
 
 func (chat *Chat) heartbeat() {
+	// 每隔一秒钟发送一次心跳
 	tc := time.NewTicker(1 * time.Second)
 	for {
 		select {

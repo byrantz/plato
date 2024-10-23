@@ -49,7 +49,7 @@ func (s *ServiceDiscovery) WatchService(prefix string, set, del func(key, value 
 	return nil
 }
 
-// watcher 监听前缀
+// watcher 监听前缀下的键值对变化的
 func (s *ServiceDiscovery) watcher(prefix string, rev int64, set, del func(key, value string)) {
 	rch := s.cli.Watch(*s.ctx, prefix, clientv3.WithPrefix(), clientv3.WithRev(rev))
 	logger.CtxInfof(*s.ctx, "watching prefix:%s now...", prefix)

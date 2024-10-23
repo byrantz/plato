@@ -31,7 +31,7 @@ func Init() {
 func Dispatch(ctx *IpConfConext) []*Endport {
 	// Step1: 获得候选endport
 	eds := dp.getCandidateEndport(ctx)
-	// Step2: 逐一计算得分
+	// Step2: 逐一计算得分，计算静态分和动态分
 	for _, ed := range eds {
 		ed.CalculateScore(ctx)
 	}
@@ -75,7 +75,7 @@ func (dp *Dispatcher) addNode(event *source.Event) {
 		ok bool
 	)
 	if ed, ok = dp.candidateTable[event.Key()]; !ok { // 不存在
-		ed := NewEndport(event.IP, event.Port)
+		ed = NewEndport(event.IP, event.Port)
 		dp.candidateTable[event.Key()] = ed
 	}
 	ed.UpdateStat(&Stat{

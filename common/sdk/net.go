@@ -41,6 +41,7 @@ func handAckMsg(c *connect, data []byte) *Message {
 	proto.Unmarshal(data, ackMsg)
 	switch ackMsg.Type {
 	case message.CmdType_Login, message.CmdType_ReConn:
+		// 将 ackMsg.ConnID 的值以原子方式存储到 c.connID 中。这样可以确保在多线程环境中，c.connID 的更新是线程安全的，不会出现数据竞争。
 		atomic.StoreUint64(&c.connID, ackMsg.ConnID)
 	}
 	return &Message{

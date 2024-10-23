@@ -51,7 +51,7 @@ func runProc(c *connection, ep *epoller) {
 	// step1: 读取一个完整的消息包
 	dataBuf, err := tcp.ReadData(c.conn)
 	if err != nil {
-		// 如果读取conn时发现连接关闭，则直接端口连接
+		// 如果读取conn时发现连接关闭，则直接移除端口连接
 		// 通知 state 清理掉意外退出的 conn的状态信息
 		if errors.Is(err, io.EOF) {
 			// 这步操作是异步的，不需要等到返回成功在进行，因为消息可靠性的保障是通过协议完成的而非某次cmd
@@ -83,7 +83,9 @@ func cmdHandler() {
 	}
 }
 func closeConn(cmd *service.CmdContext) {
+	// 如果 Load 成功，connPtr 是一个 interface{} 类型的值
 	if connPtr, ok := ep.tables.Load(cmd.ConnID); ok {
+		// // 类型断言，将 connPtr 转换为 *connection 类型
 		conn, _ := connPtr.(*connection)
 		conn.Close()
 	}

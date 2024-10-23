@@ -32,7 +32,9 @@ func testServiceRegister(ctx *context.Context, port, node string) {
 			panic(err)
 		}
 		go sr.ListenLeaseRespChan()
+		// 无线循环，不断更新服务信息
 		for {
+			// 模拟服务信息变化，更新 EndpointInfo 实例，每秒更新一次
 			ed = discovery.EndpointInfo{
 				IP:   "127.0.0.1",
 				Port: port,

@@ -260,6 +260,7 @@ func RunMain() {
 	if err := g.SetKeybinding("main", gocui.KeyArrowUp, gocui.ModNone, pasteUP); err != nil {
 		log.Panicln(err)
 	}
+	// 这是模拟短线重连，做的 case
 	go func() {
 		time.Sleep(10 * time.Second)
 		// 重新连接

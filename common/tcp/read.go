@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// 如果对方不发送数据，ReadData 函数会返回一个错误，具体错误取决于 conn.Read 返回的错误类型。
 func ReadData(conn *net.TCPConn) ([]byte, error) {
 	var dataLen uint32
 	dataLenBuf := make([]byte, 4)

@@ -29,12 +29,18 @@ type ePool struct {
 }
 
 func initEpoll(ln *net.TCPListener, f func(c *connection, ep *epoller)) {
+	// 设置go 进程打开文件数的限制
 	setLimit()
 	ep = newEPool(ln, f)
 	ep.createAcceptProcess()
 	ep.startEPool()
 }
+func closeEpoll() {
+	close(ep.done)
+}
 
+// ePool 对象包含了一个用于处理连接的通道 eChan，一个同步映射 tables，epoll 池的大小 eSize，
+// 一个用于关闭的通道 done，以及监听器 ln 和回调函数 f。
 func newEPool(ln *net.TCPListener, cb func(c *connection, ep *epoller)) *ePool {
 	return &ePool{
 		eChan:  make(chan *connection, config.GetGatewayEpollerChanNum()),
@@ -48,23 +54,26 @@ func newEPool(ln *net.TCPListener, cb func(c *connection, ep *epoller)) *ePool {
 
 // 创建一个专门处理 accept 事件的协程，与当前cpu的核数对应，能够发挥最大功效
 func (e *ePool) createAcceptProcess() {
+	// 主 Reactor 监听连接创建事件
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go func() {
 			for {
-				conn, e := e.ln.AcceptTCP()
-				// 限流熔断
+				conn, err := e.ln.AcceptTCP()
+				// 限流熔断，检查当前的 TCP 连接数是否超过了最大限制
 				if !checkTcp() {
 					_ = conn.Close()
 					continue
 				}
+				// 开启 TCP 连接的心跳检测 KeepAlive
 				setTcpConifg(conn)
-				if e != nil {
-					if ne, ok := e.(net.Error); ok && ne.Temporary() {
+				if err != nil {
+					if ne, ok := err.(net.Error); ok && ne.Temporary() {
 						fmt.Errorf("accept temp err: %v", ne)
 						continue
 					}
-					fmt.Errorf("accept err: %v", e)
+					fmt.Errorf("accept err: %v", err)
 				}
+				// 创建一个新的连接对象, 并将其添加到 epoll 的 eChan 中
 				c := NewConnection(conn)
 				ep.addTask(c)
 			}
@@ -72,6 +81,7 @@ func (e *ePool) createAcceptProcess() {
 	}
 }
 
+// 启动多个并发 epoll
 func (e *ePool) startEPool() {
 	for i := 0; i < e.eSize; i++ {
 		go e.startEProc()
@@ -153,7 +163,7 @@ func (e *epoller) add(conn *connection) error {
 		return err
 	}
 	e.fdToConnTable.Store(conn.fd, conn)
-	ep.tables.Store(fd, conn)
+	ep.tables.Store(conn.id, conn)
 	conn.BindEpoller(e)
 	return nil
 }
@@ -168,6 +178,8 @@ func (e *epoller) remove(c *connection) error {
 	e.fdToConnTable.Delete(c.fd)
 	return nil
 }
+
+// wait 函数的主要作用是等待文件描述符上的事件发生，并返回这些事件对应的连接。
 func (e *epoller) wait(msec int) ([]*connection, error) {
 	events := make([]unix.EpollEvent, config.GetGatewayEpollWaitQueueSize())
 	n, err := unix.EpollWait(e.fd, events, msec)
